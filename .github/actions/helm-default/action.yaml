@@ -31,6 +31,7 @@ runs:
       shell: bash
       run: |
         echo sha=${{ inputs.image-tag }} >> $GITHUB_OUTPUT
+        SHA="${SHA}-race"
 
         CILIUM_INSTALL_DEFAULTS="--chart-directory=${{ inputs.chart-dir }} \
           --helm-set=hubble.relay.retryTimeout=5s \
