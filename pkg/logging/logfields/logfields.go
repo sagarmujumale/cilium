@@ -1528,4 +1528,8 @@ const (
 	Args = "args"
 
 	Candidates = "candidates"
+
+	Skipped = "skipped"
+
+	AliveEntries = "aliveEntries"
 )

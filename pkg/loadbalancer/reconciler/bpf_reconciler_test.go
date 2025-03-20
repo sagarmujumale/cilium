@@ -1070,6 +1070,7 @@ func TestBPFOps(t *testing.T) {
 	var lbmaps maps.LBMaps
 	if testutils.IsPrivileged() {
 		r := &maps.BPFLBMaps{
+			Log:       log,
 			Pinned:    false,
 			Cfg:       extCfg,
 			MaglevCfg: maglevCfg,
