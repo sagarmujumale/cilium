@@ -1532,4 +1532,30 @@ const (
 	Skipped = "skipped"
 
 	AliveEntries = "aliveEntries"
+
+	BPFFSRoot = "bpffsRoot"
+
+	Section = "section"
+
+	Instruction = "instruction"
+
+	Reference = "reference"
+
+	MapRenames = "mapRenames"
+
+	Constants = "constants"
+
+	Remaining = "remaining"
+
+	Resolved = "resolved"
+
+	Scanned = "scanned"
+
+	KeySize = "keySize"
+
+	ValueSize = "valueSize"
+
+	MaxEntries = "maxEntries"
+
+	Flags = "flags"
 )
