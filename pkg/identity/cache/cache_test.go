@@ -7,6 +7,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/cilium/hive/hivetest"
 	"github.com/stretchr/testify/require"
 
 	cmtypes "github.com/cilium/cilium/pkg/clustermesh/types"
@@ -37,7 +38,8 @@ func TestLookupReservedIdentity(t *testing.T) {
 }
 
 func testLookupReservedIdentity(t *testing.T, testConfig testConfig) {
-	mgr := NewCachingIdentityAllocator(newDummyOwner(), testConfig.allocatorConfig)
+	logger := hivetest.Logger(t)
+	mgr := NewCachingIdentityAllocator(logger, newDummyOwner(logger), testConfig.allocatorConfig)
 	<-mgr.InitIdentityAllocator(nil)
 
 	hostID := identity.GetReservedID("host")

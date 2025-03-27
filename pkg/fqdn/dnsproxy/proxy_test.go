@@ -59,6 +59,7 @@ type DNSProxyTestSuite struct {
 
 func setupDNSProxyTestSuite(tb testing.TB) *DNSProxyTestSuite {
 	testutils.PrivilegedTest(tb)
+	logger := hivetest.Logger(tb)
 
 	s := &DNSProxyTestSuite{}
 
@@ -93,7 +94,7 @@ func setupDNSProxyTestSuite(tb testing.TB) *DNSProxyTestSuite {
 				return nil, false, fmt.Errorf("No EPs available when restoring")
 			}
 			model := newTestEndpointModel(int(epID1), endpoint.StateReady)
-			ep, err := endpoint.NewEndpointFromChangeModel(tb.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, model)
+			ep, err := endpoint.NewEndpointFromChangeModel(tb.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(logger), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, model)
 			ep.Start(uint16(model.ID))
 			tb.Cleanup(ep.Stop)
 			return ep, false, err
@@ -201,7 +202,7 @@ func serveDNS(w dns.ResponseWriter, r *dns.Msg) {
 
 // Setup identities, ports and endpoint IDs we will need
 var (
-	cacheAllocator          = cache.NewCachingIdentityAllocator(&testidentity.IdentityAllocatorOwnerMock{}, cache.AllocatorConfig{})
+	cacheAllocator          = cache.NewCachingIdentityAllocator(logging.DefaultSlogLogger, &testidentity.IdentityAllocatorOwnerMock{}, cache.AllocatorConfig{})
 	testSelectorCache       = policy.NewSelectorCache(logging.DefaultSlogLogger, cacheAllocator.GetIdentityCache())
 	dummySelectorCacheUser  = &testpolicy.DummySelectorCacheUser{}
 	DstID1Selector          = api.NewESFromLabels(labels.ParseSelectLabel("k8s:Dst1=test"))
@@ -523,6 +524,7 @@ func makeMapOfRuleIPOrCIDR(addrs ...string) map[restore.RuleIPOrCIDR]struct{} {
 }
 
 func TestFullPathDependence(t *testing.T) {
+	logger := hivetest.Logger(t)
 	s := setupDNSProxyTestSuite(t)
 
 	// Test that we consider each of endpoint ID, destination SecID (via the
@@ -845,7 +847,7 @@ func TestFullPathDependence(t *testing.T) {
 
 	// Restore rules
 	model := newTestEndpointModel(int(epID1), endpoint.StateReady)
-	ep1, err := endpoint.NewEndpointFromChangeModel(t.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, model)
+	ep1, err := endpoint.NewEndpointFromChangeModel(t.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(logger), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, model)
 	require.NoError(t, err)
 
 	ep1.Start(uint16(model.ID))
@@ -897,7 +899,7 @@ func TestFullPathDependence(t *testing.T) {
 
 	// Restore rules for epID3
 	modelEP3 := newTestEndpointModel(int(epID3), endpoint.StateReady)
-	ep3, err := endpoint.NewEndpointFromChangeModel(t.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, modelEP3)
+	ep3, err := endpoint.NewEndpointFromChangeModel(t.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(logger), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, modelEP3)
 	require.NoError(t, err)
 
 	ep3.Start(uint16(modelEP3.ID))
@@ -1044,6 +1046,7 @@ func TestFullPathDependence(t *testing.T) {
 }
 
 func TestRestoredEndpoint(t *testing.T) {
+	logger := hivetest.Logger(t)
 	s := setupDNSProxyTestSuite(t)
 
 	// Respond with an actual answer for the query. This also tests that the
@@ -1109,7 +1112,7 @@ func TestRestoredEndpoint(t *testing.T) {
 	// restore rules, set the mock to restoring state
 	s.restoring = true
 	model := newTestEndpointModel(int(epID1), endpoint.StateReady)
-	ep1, err := endpoint.NewEndpointFromChangeModel(t.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, model)
+	ep1, err := endpoint.NewEndpointFromChangeModel(t.Context(), nil, &endpoint.MockEndpointBuildQueue{}, nil, nil, nil, nil, nil, identitymanager.NewIDManager(logger), nil, nil, s.repo, testipcache.NewMockIPCache(), &endpoint.FakeEndpointProxy{}, testidentity.NewMockIdentityAllocator(nil), ctmap.NewFakeGCRunner(), nil, model)
 	require.NoError(t, err)
 
 	ep1.Start(uint16(model.ID))
