@@ -12,6 +12,7 @@ import (
 	"github.com/cilium/cilium/pkg/completion"
 	"github.com/cilium/cilium/pkg/identity"
 	"github.com/cilium/cilium/pkg/lock"
+	"github.com/cilium/cilium/pkg/logging"
 	"github.com/cilium/cilium/pkg/logging/logfields"
 	"github.com/cilium/cilium/pkg/metrics"
 	"github.com/cilium/cilium/pkg/node"
@@ -358,7 +359,7 @@ func (p *Proxy) GetStatusModel() *models.ProxyStatus {
 	rangeMin, rangeMax, nPorts := p.proxyPorts.GetStatusInfo()
 
 	result := &models.ProxyStatus{
-		IP:             node.GetInternalIPv4Router().String(),
+		IP:             node.GetInternalIPv4Router(logging.DefaultSlogLogger).String(),
 		PortRange:      fmt.Sprintf("%d-%d", rangeMin, rangeMax),
 		TotalPorts:     int64(nPorts),
 		TotalRedirects: int64(len(p.redirects)),

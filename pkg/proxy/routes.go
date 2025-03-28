@@ -68,7 +68,7 @@ func ReinstallRoutingRules(logger *slog.Logger, mtu int) error {
 		}
 
 		if fromIngressProxy || fromEgressProxy {
-			if err := installFromProxyRoutesIPv4(logger, node.GetInternalIPv4Router(), defaults.HostDevice, fromIngressProxy, fromEgressProxy, mtu); err != nil {
+			if err := installFromProxyRoutesIPv4(logger, node.GetInternalIPv4Router(logger), defaults.HostDevice, fromIngressProxy, fromEgressProxy, mtu); err != nil {
 				return err
 			}
 		} else {

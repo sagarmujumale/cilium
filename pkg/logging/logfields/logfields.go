@@ -1559,6 +1559,18 @@ const (
 
 	CEPUIDOld = "old-" + CEPUID
 
+	Handler = "handler"
+
+	NodeOwner = "nodeOwner"
+
+	LenStaleNodes = "lenStaleNodes"
+
+	StaleNodes = "staleNodes"
+
+	SyncInterval = "syncInterval"
+
+	BootID = "bootID"
+
 	Resources = "resources"
 
 	LastModifiedVersion = "lastModifiedVersion"

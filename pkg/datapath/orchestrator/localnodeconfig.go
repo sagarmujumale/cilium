@@ -6,6 +6,7 @@ package orchestrator
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/cilium/statedb"
 
@@ -35,6 +36,7 @@ const (
 // is never mutated in-place.
 func newLocalNodeConfig(
 	ctx context.Context,
+	logger *slog.Logger,
 	config *option.DaemonConfig,
 	localNode node.LocalNode,
 	txn statedb.ReadTxn,
@@ -79,7 +81,7 @@ func newLocalNodeConfig(
 		AllocCIDRIPv6:                localNode.IPv6AllocCIDR,
 		NativeRoutingCIDRIPv4:        datapath.RemoteSNATDstAddrExclusionCIDRv4(localNode),
 		NativeRoutingCIDRIPv6:        datapath.RemoteSNATDstAddrExclusionCIDRv6(localNode),
-		LoopbackIPv4:                 node.GetIPv4Loopback(),
+		LoopbackIPv4:                 node.GetIPv4Loopback(logger),
 		Devices:                      nativeDevices,
 		NodeAddresses:                statedb.Collect(nodeAddrsIter),
 		DirectRoutingDevice:          directRoutingDevice,
