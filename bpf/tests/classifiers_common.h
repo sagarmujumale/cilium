@@ -2,6 +2,8 @@
 /* Copyright Authors of Cilium */
 
 #define ENABLE_WIREGUARD 1
+#define HAVE_ENCAP 1
+#define TUNNEL_PROTOCOL TUNNEL_PROTOCOL_VXLAN
 
 #include "common.h"
 #include "bpf/ctx/skb.h"
@@ -177,6 +179,12 @@ int ctx_to_netdev_classifiers_check(struct __ctx_buff *ctx)
 #else
 	assert(flags & CLS_FLAG_WIREGUARD);
 #endif
+
+	ctx->mark = MARK_MAGIC_OVERLAY;
+
+	flags = ctx_to_netdev_classifiers(ctx);
+
+	assert(flags & CLS_FLAG_VXLAN);
 
 	test_finish();
 }

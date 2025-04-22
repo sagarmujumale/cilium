@@ -13,8 +13,12 @@
 # define CLASSIFIERS_FROM_NETDEV
 #endif
 
-/* Wireguard-encrypted packets are observed from to-netdev */
-#if defined(IS_BPF_HOST) && defined(ENABLE_WIREGUARD)
+/* Match types of traffic in the following hooks:
+ * - to-netdev -> Wireguard and Overlay
+ * - to-wireguard -> Overlay
+ */
+#if (defined(IS_BPF_HOST) && (defined(ENABLE_WIREGUARD) || defined(HAVE_ENCAP))) || \
+	(defined(IS_BPF_WIREGUARD) && defined(HAVE_ENCAP))
 # define CLASSIFIERS_TO_NETDEV
 #endif
 
@@ -31,6 +35,8 @@ enum {
 	CLS_FLAG_L3_DEV    = (1 << 1),
 	CLS_FLAG_IPSEC     = (1 << 2),
 	CLS_FLAG_WIREGUARD = (1 << 3),
+	CLS_FLAG_VXLAN     = (1 << 4),
+	CLS_FLAG_GENEVE    = (1 << 5),
 };
 
 #ifdef CLASSIFIERS_DEVICE
@@ -112,6 +118,8 @@ ctx_from_netdev_classifiers6(struct __ctx_buff *ctx, const struct ipv6hdr *ip6)
 #ifdef CLASSIFIERS_TO_NETDEV
 /* Compute to_netdev classifiers upon processing an egress network packet:
  * - CLS_FLAG_WIREGUARD, in case of a WireGuard packet (MARK_MAGIC_WG_ENCRYPTED)
+ * - CLS_FLAG_VXLAN, in case of VXLAN overlay packet (MARK_MAGIC_OVERLAY)
+ * - CLS_FLAG_GENEVE, in case of Geneve overlay packet (MARK_MAGIC_OVERLAY)
  */
 static __always_inline cls_flags_t
 ctx_to_netdev_classifiers(struct __ctx_buff *ctx)
@@ -119,6 +127,18 @@ ctx_to_netdev_classifiers(struct __ctx_buff *ctx)
 #if defined(IS_BPF_HOST) && defined(ENABLE_WIREGUARD)
 	if (ctx_is_wireguard(ctx))
 		return CLS_FLAG_WIREGUARD;
+#endif
+
+#ifdef HAVE_ENCAP
+	if (ctx_is_overlay(ctx))
+		switch (TUNNEL_PROTOCOL) {
+		case TUNNEL_PROTOCOL_VXLAN:
+			return CLS_FLAG_VXLAN;
+		case TUNNEL_PROTOCOL_GENEVE:
+			return CLS_FLAG_GENEVE;
+		default:
+			__throw_build_bug();
+		}
 #endif
 
 	return CLS_FLAG_NONE;
