@@ -8,17 +8,13 @@
 #include "lib/ipv4.h"
 #include "lib/ipv6.h"
 
-/* Wireguard-encrypted packets are observed from from-netdev */
-#if defined(IS_BPF_HOST) && defined(ENABLE_WIREGUARD)
-# define CLASSIFIERS_FROM_NETDEV
-#endif
-
 /* Match types of traffic in the following hooks:
- * - to-netdev -> Wireguard and Overlay
- * - to-wireguard -> Overlay
+ * - {to,from}-netdev -> Wireguard and Overlay
+ * - {to,from}-wireguard -> Overlay
  */
 #if (defined(IS_BPF_HOST) && (defined(ENABLE_WIREGUARD) || defined(HAVE_ENCAP))) || \
 	(defined(IS_BPF_WIREGUARD) && defined(HAVE_ENCAP))
+# define CLASSIFIERS_FROM_NETDEV
 # define CLASSIFIERS_TO_NETDEV
 #endif
 
@@ -65,6 +61,8 @@ ctx_device_classifiers(const struct __ctx_buff *ctx)
 #ifdef CLASSIFIERS_FROM_NETDEV
 /* Compute from_netdev classifiers upon receiving an ingress network packet:
  * - CLS_FLAG_WIREGUARD, in case of a WireGuard packet (l4 WG_PORT)
+ * - CLS_FLAG_VXLAN, in case of VXLAN overlay packet (l4 TUNNEL_PORT)
+ * - CLS_FLAG_GENEVE, in case of Geneve overlay packet (l4 TUNNEL_PORT)
  */
 static __always_inline cls_flags_t
 ctx_from_netdev_classifiers(struct __ctx_buff *ctx, int l4_off, __u8 protocol)
@@ -83,6 +81,18 @@ ctx_from_netdev_classifiers(struct __ctx_buff *ctx, int l4_off, __u8 protocol)
 #if defined(IS_BPF_HOST) && defined(ENABLE_WIREGUARD)
 	if (l4.sport == bpf_htons(WG_PORT) || l4.dport == bpf_htons(WG_PORT))
 		return CLS_FLAG_WIREGUARD;
+#endif
+
+#ifdef HAVE_ENCAP
+	if (l4.sport == bpf_htons(TUNNEL_PORT) || l4.dport == bpf_htons(TUNNEL_PORT))
+		switch (TUNNEL_PROTOCOL) {
+		case TUNNEL_PROTOCOL_VXLAN:
+			return CLS_FLAG_VXLAN;
+		case TUNNEL_PROTOCOL_GENEVE:
+			return CLS_FLAG_GENEVE;
+		default:
+			__throw_build_bug();
+		}
 #endif
 
 out:
