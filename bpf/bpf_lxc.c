@@ -472,7 +472,6 @@ static __always_inline int handle_ipv6_from_lxc(struct __ctx_buff *ctx, __u32 *d
 		.reason = TRACE_REASON_UNKNOWN,
 		.monitor = 0,
 	};
-	__u8 __maybe_unused encrypt_key = 0;
 	bool __maybe_unused skip_tunnel = false;
 	enum ct_status ct_status;
 	__u8 policy_match_type = POLICY_MATCH_NONE;
@@ -494,7 +493,6 @@ static __always_inline int handle_ipv6_from_lxc(struct __ctx_buff *ctx, __u32 *d
 		info = lookup_ip6_remote_endpoint(daddr, 0);
 		if (info) {
 			*dst_sec_identity = info->sec_identity;
-			encrypt_key = get_min_encrypt_key(info->key);
 			skip_tunnel = info->flag_skip_tunnel;
 		} else {
 			*dst_sec_identity = WORLD_IPV6_ID;
@@ -725,9 +723,8 @@ ct_recreate6:
 			 * (a) the packet needs IPSec encap so push ctx to stack for encap, or
 			 * (b) packet was redirected to tunnel device so return.
 			 */
-			ret = encap_and_redirect_lxc(ctx, info, encrypt_key,
-						     SECLABEL_IPV6, *dst_sec_identity,
-						     &trace);
+			ret = encap_and_redirect_lxc(ctx, info, SECLABEL_IPV6,
+						     *dst_sec_identity, &trace);
 			switch (ret) {
 			case CTX_ACT_OK:
 				goto encrypt_to_stack;
@@ -898,7 +895,6 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
 		.reason = TRACE_REASON_UNKNOWN,
 		.monitor = 0,
 	};
-	__u8 __maybe_unused encrypt_key = 0;
 	bool __maybe_unused skip_tunnel = false;
 	bool hairpin_flow = false; /* endpoint wants to access itself via service IP */
 	__u8 policy_match_type = POLICY_MATCH_NONE;
@@ -925,7 +921,6 @@ static __always_inline int handle_ipv4_from_lxc(struct __ctx_buff *ctx, __u32 *d
 	info = lookup_ip4_remote_endpoint(ip4->daddr, cluster_id);
 	if (info) {
 		*dst_sec_identity = info->sec_identity;
-		encrypt_key = get_min_encrypt_key(info->key);
 		skip_tunnel = info->flag_skip_tunnel;
 	} else {
 		*dst_sec_identity = WORLD_IPV4_ID;
@@ -1268,9 +1263,8 @@ skip_vtep:
 #endif
 
 		if (info && info->flag_has_tunnel_ep) {
-			ret = encap_and_redirect_lxc(ctx, info, encrypt_key,
-						     SECLABEL_IPV4, *dst_sec_identity,
-						     &trace);
+			ret = encap_and_redirect_lxc(ctx, info, SECLABEL_IPV4,
+						     *dst_sec_identity, &trace);
 			switch (ret) {
 			case CTX_ACT_OK:
 				/* IPsec, pass up to stack for XFRM processing. */
