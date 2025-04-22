@@ -31,9 +31,12 @@ const (
 	// TraceNotifyFlagIsL3Device is set in TraceNotify.Flags when the
 	// notification refers to a L3 device.
 	TraceNotifyFlagIsL3Device
-	// TraceNotifyFlagIsEncrypted is set in TraceNotify.Flags when the
-	// notification refers to an encrypted network packet.
-	TraceNotifyFlagIsEncrypted
+	// TraceNotifyFlagIsIPSec is set in TraceNotify.Flags when the
+	// notification refers to an encrypted IPSec packet.
+	TraceNotifyFlagIsIPSec
+	// TraceNotifyFlagIsWireguard is set in TraceNotify.Flags when the
+	// notification refers to an encrypted Wireguard packet.
+	TraceNotifyFlagIsWireguard
 )
 
 const (
@@ -99,10 +102,22 @@ func (tn *TraceNotify) decodeTraceNotify(data []byte) error {
 	return nil
 }
 
-// IsEncrypted returns true when the notification has the encrypt flag set,
+// IsWireguard returns true when the notification has the encrypt Wireguard flag set,
+// false otherwise.
+func (n *TraceNotify) IsWireguard() bool {
+	return n.Flags&TraceNotifyFlagIsWireguard != 0
+}
+
+// IsIPSec returns true when the notification has the encrypt IPSec flag set,
+// false otherwise.
+func (n *TraceNotify) IsIPSec() bool {
+	return n.Flags&TraceNotifyFlagIsIPSec != 0
+}
+
+// IsEncrypted returns true when either IsIPSec() or IsWireguard() is true,
 // false otherwise.
 func (n *TraceNotify) IsEncrypted() bool {
-	return n.Flags&TraceNotifyFlagIsEncrypted != 0
+	return n.IsIPSec() || n.IsWireguard()
 }
 
 // TraceReason returns the trace reason for this notification, see the

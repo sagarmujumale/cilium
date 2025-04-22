@@ -106,7 +106,7 @@ _update_trace_metrics(struct __ctx_buff *ctx, enum trace_point obs_point,
 	case TRACE_FROM_STACK:
 	case TRACE_FROM_OVERLAY:
 	case TRACE_FROM_NETWORK:
-		if (flags & CLS_FLAG_ENCRYPTED)
+		if (flags & (CLS_FLAG_IPSEC | CLS_FLAG_WIREGUARD))
 			_update_metrics(ctx_full_len(ctx), METRIC_INGRESS,
 					REASON_DECRYPT, line, file);
 		else

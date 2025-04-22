@@ -16,7 +16,8 @@ enum {
 	CLS_FLAG_NONE      = 0,
 	CLS_FLAG_IPV6	   = (1 << 0),
 	CLS_FLAG_L3_DEV    = (1 << 1),
-	CLS_FLAG_ENCRYPTED = (1 << 2),
+	CLS_FLAG_IPSEC     = (1 << 2),
+	CLS_FLAG_WIREGUARD = (1 << 3),
 };
 
 #ifdef CLASSIFIERS_DEVICE
