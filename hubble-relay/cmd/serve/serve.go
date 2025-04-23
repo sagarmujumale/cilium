@@ -244,7 +244,7 @@ func runServe(vp *viper.Viper) error {
 	}
 
 	if vp.GetBool(keyPprof) {
-		pprof.Enable(vp.GetString(keyPprofAddress), vp.GetInt(keyPprofPort))
+		pprof.Enable(logger, vp.GetString(keyPprofAddress), vp.GetInt(keyPprofPort))
 	}
 	gopsEnabled := vp.GetBool(keyGops)
 	if gopsEnabled {
