@@ -1531,6 +1531,8 @@ const (
 
 	Candidates = "candidates"
 
+	ExitCode = "exitCode"
+
 	DNSRulesV2 = "dnsRulesV2"
 
 	BPFHeaderfileHashOld = "old-" + "bpfHeaderfileHash"
