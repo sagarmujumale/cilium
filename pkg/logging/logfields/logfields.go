@@ -1533,7 +1533,17 @@ const (
 
 	ExitCode = "exitCode"
 
+	Location = "location"
+
 	DNSRulesV2 = "dnsRulesV2"
+
+	NumBufferedEvents = "numBufferedEvents"
+
+	EventHandlingDuration = "eventHandlingDuration"
+
+	EventEnqueueWaitTime = "eventEnqueueWaitTime"
+
+	EventConsumeOffQueueWaitTime = "eventConsumeOffQueueWaitTime"
 
 	BPFHeaderfileHashOld = "old-" + "bpfHeaderfileHash"
 
