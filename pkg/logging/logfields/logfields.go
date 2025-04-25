@@ -1559,6 +1559,8 @@ const (
 
 	CEPUIDOld = "old-" + CEPUID
 
+	MulticastAddr = "multicastAddr"
+
 	Resources = "resources"
 
 	LastModifiedVersion = "lastModifiedVersion"
